@@ -1,5 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser'); //bodyParser takes JSON and conerts into an object
+const {ObjectID} = require('mongodb')  //in this case, used to check if our var id is a valid object
+
 
 var {mongoose} = require('./db/mongoose.js') ; //import the mongoose.js file creating a local variable {}
 var {Todo} = require('./models/todo.js') ;
@@ -32,6 +34,29 @@ app.get('/todos' , (req, res) => {
     res.status(400).send(e);
   });
 });
+
+//GET from URL String
+app.get('/todos/:id', (req, res) => {  // :id is the parameter key
+  var id = req.params.id;
+
+  //check if id is valid
+  if (!ObjectID.isValid(id)) {
+    // console.log('id is invalid');
+    return res.status(404).send();  //404 is not found code
+  }
+
+  Todo.findById(id).then((todo) => {
+    //check if to do is returned
+    if (!todo) {
+      return res.status(404).send();
+    }
+    //if found
+    res.send({todo});
+  }).catch((e) =>  {
+    res.status(400).send();
+  });
+});
+
 
 app.listen(3000, () => {
   console.log('Started on port 3000');
