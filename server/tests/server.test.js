@@ -4,8 +4,17 @@ const request = require('supertest');
 const {app} = require('./../server');  //the 2 dots .. is to go one folder backwards
 const {Todo} = require('./../models/todo.js');
 
+//create an array of  objects to add to the todos table
+const todos = [{
+  text: 'First test todo'
+},{
+  text: 'Second test todo'
+}];
+
 beforeEach((done) => {
-    Todo.remove({}).then(() => done());  //make the Todos table empty, then its done to execute below tests
+    Todo.remove({}).then(() => { //First make the Todos table empty, then its done to execute below tests
+      return Todo.insertMany(todos);  //Then save all the todos array in to table
+    }).then(() => done());
 });
 
 describe('POST /todos', () => {
@@ -27,8 +36,8 @@ describe('POST /todos', () => {
 
           //if no error, check to see if mongodb was updated with the text
 
-          Todo.find().then((todos) => {
-            //assuming table to be empty and we added 1 item. we delete all items in database before running this using beforeEach in Line 7 above
+          Todo.find({text}).then((todos) => {
+            //assuming table has the defined text
             expect(todos.length).toBe(1);
             expect(todos[0].text).toBe(text);  //expect that 1 item (text) to the text variable we passed
             done();
@@ -49,9 +58,22 @@ describe('POST /todos', () => {
       }
 
       Todo.find().then((todos) => {
-        expect(todos.length).toBe(0);  //expect nothing to be in database
+        expect(todos.length).toBe(2);  //expecting the 2 todos array is saved, then it will have only 2 items
         done();
       }).catch((e) => done(e));
     });
+  });
+});
+
+//Test GET
+describe('GET /todos',() => {
+  it('should get all todos',(done) => {
+    request(app)
+    .get('/todos')
+    .expect(200)
+    .expect((res) => {
+      expect(res.body.todos.length).toBe(2);  //expect 2 items in the table
+    })
+    .end(done);
   });
 });

@@ -27,11 +27,11 @@ app.post('/todos', (req, res) => {
 app.get('/todos' , (req, res) => {
   //Get All todos
   Todo.find().then((todos) => {
-    res.send({todos}); //send response as an object, you pass sevral datas when passing as object 
-  }), (e) => {
-
-  }
-})
+    res.send({todos}); //send response as an object, you pass sevral datas when passing as object
+  }, (e) => {
+    res.status(400).send(e);
+  });
+});
 
 app.listen(3000, () => {
   console.log('Started on port 3000');
