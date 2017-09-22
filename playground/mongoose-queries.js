@@ -3,7 +3,7 @@ const {ObjectID} = require('mongodb')  //in this case, used to check if our var 
 const {mongoose} = require('./../server/db/mongoose');  //the 2 dots .. is to go one folder backwards
 const {Todo} = require('./../server/models/todo.js');
 
-var id = '69c387c80c175a06432d123e1';
+var id = '59c3af1ccfa79210b06e1a86';
 
 //CHECK IF id is valid Object
 if (!ObjectID.isValid(id)) {
