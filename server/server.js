@@ -1,5 +1,6 @@
-var express = require('express');
-var bodyParser = require('body-parser'); //bodyParser takes JSON and conerts into an object
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser'); //bodyParser takes JSON and conerts into an object
 const {ObjectID} = require('mongodb')  //in this case, used to check if our var id is a valid object
 
 
@@ -76,6 +77,32 @@ app.delete('/todos/:id', (req, res) => {
     });
 });
 
+//For update use app.patch
+app.patch('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  //from lodash library
+  var body = _.pick(req.body, ['text','completed']); //from req.body, pick text and completed JSON keys or properties
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  //if body.completed is a boolean && if body.completed is True
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completedAt = null;
+    body.completed = false;
+  }
+//We already defined the updates in the var body given above
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => { //new: true is given to return updated document and not original document
+    if (!todo) {
+      return res.status(404).send(); //No todo exists with that id
+    }
+    res.send({todo});  //send todo which is updated as a response
+  }).catch((e) => {
+    res.status(400).send();
+  })
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
