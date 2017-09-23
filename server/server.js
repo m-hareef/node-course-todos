@@ -9,6 +9,7 @@ const {ObjectID} = require('mongodb')  //in this case, used to check if our var 
 var {mongoose} = require('./db/mongoose.js') ; //import the mongoose.js file creating a local variable {}
 var {Todo} = require('./models/todo.js') ;
 var {User} = require('./models/user.js') ;
+var {authenticate} = require('./middleware/authenticate.js');
 
 var app = express();
 const port = process.env.PORT || 3000; //Use heroku's environment port or use 3000
@@ -116,12 +117,18 @@ app.post('/users', (req, res) => {
     return user.generateAuthToken();  //call defined method in user.js to get the token
   }).then((token) => {
     //If save was success, return back the user details with the header
-    res.header('x-auth', token).send(user); //header takes 2 arguments custom created header x-auth and 2nd argument is the token 
+    res.header('x-auth', token).send(user); //header takes 2 arguments custom created header x-auth and 2nd argument is the token
   }).catch((e) => {
     res.status(400).send(e);
   })
 });
 
+
+//GET to check if authenticated using token
+app.get('/users/me', authenticate, (req, res) => { //Middleware to authenticate from Middleware/authenticate.js
+  res.send(req.user);
+
+});
 
 app.listen(port, () => {
   console.log(`Started on port ${port}`);

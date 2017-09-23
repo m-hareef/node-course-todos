@@ -65,6 +65,27 @@ UserSchema.methods.generateAuthToken = function () {  //using regular function a
   });
 };
 
+//UserSchema.statics is like a method but like a model method instead of instance method
+UserSchema.statics.findByToken = function (token) {
+  var User = this;  //used upperCAse User as this is treated as model and not instance which is smallcase user
+  var decoded;
+
+  try {
+    decoded = jwt.verify(token, 'abc123');
+  } catch (e) {
+    return Promise.reject();
+  }
+  //if try block does not fail
+  return User.findOne({  //returns the values from the nested docs, arrays in the table
+    '_id': decoded._id,
+    'tokens.token' : token,
+    'tokens.access': 'auth'
+  });
+
+
+};
+
+
 //Create model for Users table passing in the schema
 var User = mongoose.model('Users', UserSchema );
 
