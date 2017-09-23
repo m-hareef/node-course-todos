@@ -85,13 +85,36 @@ UserSchema.statics.findByToken = function (token) {
 
 };
 
-//Using Mongoose middleware to run a function before any given event, in this case before save
+//Authenticate users
+UserSchema.statics.findByCredentials = function (email, password) {
+  var User = this;
+  //first find user with given email
+  return User.findOne({email}).then((user) => { //chaining promises. thats why we used return
+    if (!user) {
+      return Promise.reject();
+    }
+    //now we need decrypt the plain password to check, but the bcrypt.compare method only supports callback
+    //so to use keep using promises we do the following
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) {  //if response is true
+          resolve(user);
+        } else {
+          reject();
+        };
+      });
+    });
+  });
+
+};
+
+//Using Mongoose middleware to run a function before any given event, in this case before save we convert plain text password to hashed password
 UserSchema.pre('save', function (next) {
   var user = this;
   //check if user modified password
   if (user.isModified('password')) {
     bcrypt.genSalt(10, (err,salt) => {  //10 is the number of rounds we want to use to generate the Salt, bigger number means longer algorithm it takes
-      bcrypt.hash(user.password, salt, (err, hash) => {
+      bcrypt.hash(user.password, salt, (err, hash) => {  //now the user.password is plain text password
         user.password = hash;
         next();
       })

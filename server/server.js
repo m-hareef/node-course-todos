@@ -130,6 +130,21 @@ app.get('/users/me', authenticate, (req, res) => { //Middleware to authenticate 
 
 });
 
+
+//POST ROUTE for user login - authenticate user
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  //call function to authenticate users
+  User.findByCredentials(body.email, body.password).then((user) => {
+    //once user is found, generate token for the user
+    user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    })
+  }).catch((e) => {
+    res.send(400).send();
+  });
+});
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });

@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 var password = '123abc!';
 
 // ENCRYPT
-bcrypt.genSalt(10, (err,salt) => {
+bcrypt.genSalt(10, (err,salt) => {  //10 is the number of rounds we want to use to generate the Salt, bigger number means longer algorithm it takes
   bcrypt.hash(password, salt, (err, hash) => {
     console.log(hash);  //The results will be different each time
   })
