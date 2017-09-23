@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
 
 //Create a schema for Users table to include tokens and hash for password encrption
 var UserSchema = new mongoose.Schema({
@@ -82,9 +83,23 @@ UserSchema.statics.findByToken = function (token) {
     'tokens.access': 'auth'
   });
 
-
 };
 
+//Using Mongoose middleware to run a function before any given event, in this case before save
+UserSchema.pre('save', function (next) {
+  var user = this;
+  //check if user modified password
+  if (user.isModified('password')) {
+    bcrypt.genSalt(10, (err,salt) => {  //10 is the number of rounds we want to use to generate the Salt, bigger number means longer algorithm it takes
+      bcrypt.hash(user.password, salt, (err, hash) => {
+        user.password = hash;
+        next();
+      })
+    })
+  } else {
+    next();
+  }
+});
 
 //Create model for Users table passing in the schema
 var User = mongoose.model('Users', UserSchema );
