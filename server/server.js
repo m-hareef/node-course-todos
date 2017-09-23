@@ -1,4 +1,4 @@
-require('./config/config');
+require('./config/config');  //Load the config file
 
 const _ = require('lodash');
 const express = require('express');
@@ -106,37 +106,26 @@ app.patch('/todos/:id', (req, res) => {
   })
 });
 
+
+//POST /users
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']) //from the body we sent in postman pick email and password keys
+  var user = new User(body);
+
+  user.save().then(() => {
+    return user.generateAuthToken();  //call defined method in user.js to get the token
+  }).then((token) => {
+    //If save was success, return back the user details with the header
+    res.header('x-auth', token).send(user); //header takes 2 arguments custom created header x-auth and 2nd argument is the token 
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
+});
+
+
 app.listen(port, () => {
   console.log(`Started on port ${port}`);
 });
 
-
-//
-// //define data for the new model
-// var newTodo = new Todo({
-//   text: 'Learn',
-//   completed: false,
-//   completedAt: 30
-// });
-//
-// //Save the defined data and use promise to log
-// newTodo.save().then((doc) => {
-//   console.log('Saved Todo', doc);
-// }, (e) => {
-//   console.log('Unable to save ', e);
-// });
-//
-// //Create model for Users table
-//
-//
-// var newUser = new User({
-//   email: 'hareef@me.com'
-// });
-//
-// newUser.save().then((doc) => {
-//   console.log('Saved user',doc);
-// }, (e) => {
-//   console.log('Unable to save ', e);
-// });
 
 module.exports = { app };
