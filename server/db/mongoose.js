@@ -4,14 +4,17 @@ var mongoose  = require('mongoose');
 //Tell mongoose to use the built in Promise library instead of any third-party
 mongoose.Promsie = global.Promise;
 
-let db = {
-  localhost: ' ',
-  mLab: 'mongodb://hareef:mLab123@ds143754.mlab.com:43754/todo-app'  //using mongodb cloud https://mlab.com usernme: hareef, password; mLab123
-}
-mongoose.connect(db.mLab,{
+//Commenting below to use NODE_ENV variable
+// mongoose.connect(db.mLab,{
+//   useMongoClient: true
+//
+// });
+
+mongoose.connect(process.env.MONGODB_URI,{
   useMongoClient: true
 
 });
+
 console.log('Connected');
 
 module.exports = {mongoose};
