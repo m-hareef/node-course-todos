@@ -66,6 +66,19 @@ UserSchema.methods.generateAuthToken = function () {  //using regular function a
   });
 };
 
+//delete the token of the logged in user. the token is removed from the array in the table using $pull method by mongoose
+UserSchema.methods.removeToken = function (token) {
+  var user = this;
+  return user.update({  //update command is used modify the document by removing the array
+    $pull: {
+      tokens: {
+        token  //token : token simplified
+      }
+    }
+  });
+};
+
+
 //UserSchema.statics is like a method but like a model method instead of instance method
 UserSchema.statics.findByToken = function (token) {
   var User = this;  //used upperCAse User as this is treated as model and not instance which is smallcase user
